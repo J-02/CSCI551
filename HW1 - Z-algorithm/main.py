@@ -1,6 +1,7 @@
 import sys
 
 # runs in terminal with "python main.py test.fasta search"
+# python main.py test.fasta TAC
 # can be run on any .fasta file in directory
 # This code reads the fasta file to dictionary
 
