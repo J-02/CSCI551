@@ -1,9 +1,9 @@
 import sys
-
+#exact pattern match utilizing the Z algorithm
 # runs in terminal with "python main.py test.fasta search"
 # python main.py test.fasta TAC
-# can be run on any .fasta file in directory
-# This code reads the fasta file to dictionary
+# can be run on any .fasta file in directory (with single and multiple sequences)
+# This code reads the fasta file to dictionary = 'motif'
 
 def main(file, search):
     # Search each sequence in file for string and return z array and exact pattern matching
@@ -45,16 +45,16 @@ def zalg(s):
     l = r = 0
 
     for k in range(1, n):
-
-        if k <= r:
-            Z[k] = min(r - k + 1, Z[k - l])
-
-        while k + Z[k] < n and s[Z[k]] == s[k + Z[k]]:
+#iterate through all k values in range n-1
+        if k <= r: #Case1: k is within the interval [1,r]
+            Z[k] = min(r - k + 1, Z[k - l]) #determkne the distance from right most boundatry from r to k and find the Z value at the position k-1
+#Case 2: execute explicit charactet comparison to calculate Z[k]
+        while k + Z[k] < n and s[Z[k]] == s[k + Z[k]]: # within the bounds of s and characters match, increment Z[k]+1 to the length of the matching sequence
             Z[k] += 1
-
+#Update the interval to the extent of the curren Z[k]
         if k + Z[k] - 1 > r:
             l, r = k, k + Z[k] - 1
-
+#Return calculated Z value
     return Z
 
 # to run in terminal
