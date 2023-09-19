@@ -13,6 +13,7 @@ def main(file, search):
     S = motifs[0]
 
 
+
 def readFasta(file):
     motifs = []
     key = ""
