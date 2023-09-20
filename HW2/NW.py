@@ -43,7 +43,7 @@ def main(scores, file):
     # Filling in the scoring matrix V
     for i in range(1, m):
         for j in range(1, n):
-            match_score = V[i - 1][j - 1] + (match if T[i] == S[j] else mismatch)
+            match_score = V[i - 1][j - 1] + (match if T[i-1] == S[j-1] else mismatch)
             gap_in_T = V[i - 1][j] + insertion
             gap_in_S = V[i][j - 1] + deletion
             V[i][j] = max(match_score, gap_in_T, gap_in_S)
@@ -64,7 +64,7 @@ def main(scores, file):
     print("Optimal Alignment Score:", optimal_score)
 
 # Test run function with example scores and file
-main((2, -1, -1, -1), "test.fa")
+main((2, -6, -6, -6), "test.fa")
 
 # To run in the terminal, uncomment and modify the following lines:
 # if __name__ == "__main__":
