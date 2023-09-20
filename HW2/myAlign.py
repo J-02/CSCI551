@@ -6,60 +6,79 @@ import numpy as np
 # This code reads the fasta file to dictionary
 
 def main(scores, file):
-    # Search each sequence in file for string and return z array and exact pattern matching
+
     motifs = readFasta(file)
     # get S and T
     match = scores[0]
     # score for match
     mismatch = scores[1]
     # score for mismatch
-   insertion = scores[2]
-   deletion = scores[3]
+    insdel = scores[2]
     # score for insertion/deletion
 
-    gap_penalty = -1
+    gap_penalty = insdel
 
 
     # adding gaps to the beginning of each sequence
-    T = "-" + motifs[1]
-    S = "-" + motifs[0]
+    S = "-" + motifs[1]
+    T = "-" + motifs[0]
 
-    # debug print
-    print(T)
-    print(S)
-    m = len(T)
-    n = len(S)
+    m = len(T)-1
+    n = len(S)-1
     # initialize V
-    V = np.zeros(shape = (m +1, n +1))
+    V = np.zeros(shape=(m+1, n+1))
 
-    # debug print
-    print(V)
-    for i, V in enumerate(T):
-        V[i,0] = i * gap_penalty
-    for j, V in enumerate(S):
-        V[0,j] = j * gap_penalty
-    # iterating through each letter in T
-    for i, Ti in enumerate(T):
-        print(i,Ti)
+    # filling first row and column with gap penalties
+    for i in range(n+1):
+        V[0,i] = i*gap_penalty
+    for i in range(m+1):
+        V[i,0] = i*gap_penalty
+
+    # iterating through each letter in T not including gap
+    for i in range(1,m+1):
         # i is index of Ti in T
-        # iterating through each letter in S
-        for j, Sj in enumerate(S):
-            print(j,Sj)
+        # iterating through each letter in S not including gap
+        for j in range(1,n+1):
             # j is index of Sj in S
-            if Ti == Sj:
-
+            if T[i] == S[j]:
                 # if equal add match score
-                V[i,j] += match
-            elif i != j:
-                V[i,j]- mismatch
-                # TODO: add rest of algorithm here
-                pass
+                V[i,j] = match + V[i-1,j-1]
+            elif T[i] != S[j]:
+                # checking others if not a match
+                V[i,j] = max(V[i][j-1] + gap_penalty, V[i-1][j] + gap_penalty, V[i-1][j-1] + mismatch)
+    print(f"Optimal Global Alignment: {int(V[m,n])}")
 
+    all_alignments = []
 
+    # recursive_opt_alignment recursively calls itself to get all optimal global alignments from V by tracing the values in it
+    def recursive_opt_alignment(i, j, aT, aS, alignments):
+        # adds full optimal alignments to alignments
+        if i == 0 and j == 0:
+            alignments.append((''.join(reversed(aT)), ''.join(reversed(aS))))
+            return
 
+        # continues the global alignment from the diagonal
+        if i > 0 and j > 0:
+            diagonal = V[i - 1][j - 1]
+            if V[i][j] == diagonal + (match if T[i] == S[j] else mismatch):
+                recursive_opt_alignment(i - 1, j - 1, aT + [T[i]], aS + [S[j]], alignments)
 
+        # continues the global alignment from above V[i,j] at V[i-1,j]
+        if i > 0:
+            vertical = V[i - 1][j]
+            if V[i][j] == vertical + gap_penalty:
+                recursive_opt_alignment(i - 1, j, aT + [T[i]], aS + ['-'], alignments)
 
+        # continues the global alignment from next to V[i,j] to V[i,j-1]
+        if j > 0:
+            horizontal = V[i][j - 1]
+            if V[i][j] == horizontal + gap_penalty:
+                recursive_opt_alignment(i, j - 1, aT + ['-'], aS + [S[j]], alignments)
 
+    recursive_opt_alignment(m, n, [], [], all_alignments)
+
+    print(f"All optimal global alignments {all_alignments}")
+    # Reverse the aligned sequences to get the final alignment
 
 
 def readFasta(file):
@@ -73,7 +92,7 @@ def readFasta(file):
         else:
             motifs.append(seq)
 
-    print(motifs)
+    print(f"Getting Global alignment for {motifs}")
     return motifs
 
 # test run function
