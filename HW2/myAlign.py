@@ -87,8 +87,11 @@ def readFasta(file):
         lines = f.readlines()
     for i in range(0, len(lines)):
         seq = lines[i].strip()  # skips the line if > is present
-        if seq[0] == '>':  # Executes check of '>' character
+        if seq == "": # if there is a space
+            continue
+        elif seq[0] == '>':  # Executes check of '>' character
             text = ""
+
         else:
             motifs.append(seq)
 
