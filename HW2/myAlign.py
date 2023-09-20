@@ -1,9 +1,9 @@
 import sys
 import numpy as np
-# runs in terminal with "python main.py test.fasta search"
-# python main.py test.fasta TAC
-# can be run on any .fasta file in directory
-# This code reads the fasta file to dictionary
+# runs in terminal with "python myAlign.py 2 -1 -1 test.fa"
+# python myAlign.py 2 -1 -1 test.fa
+# can be run on any text file in directory with 2 sequences
+# This code reads the text file to list of 2 elements
 
 def main(scores, file):
 
