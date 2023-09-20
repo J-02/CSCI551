@@ -49,7 +49,7 @@ def main(scores, file):
     print(f"Optimal Global Alignment: {int(V[m,n])}")
 
     all_alignments = []
-
+    # print(V)
     # recursive_opt_alignment recursively calls itself to get all optimal global alignments from V by tracing the values in it
     def recursive_opt_alignment(i, j, aT, aS, alignments):
         # adds full optimal alignments to alignments
@@ -97,13 +97,13 @@ def readFasta(file):
 
 # test run function
 # scores in tuple (a, b, c)
-main((2,-1,-1), "test.fa")
+# main((2,-1,-1), "test.fa")
 
 # to run in terminal
-#if __name__ == "__main__":
-#   a = int(sys.argv[1])
-#   b = int(sys.argv[2])
-#   c = int(sys.argv[3])
-#   file = sys.argv[4]
-#   scoring = (a,b,c)
-#   main(scoring, file)
+if __name__ == "__main__":
+   a = int(sys.argv[1])
+   b = int(sys.argv[2])
+   c = int(sys.argv[3])
+   file = sys.argv[4]
+   scoring = (a,b,c)
+   main(scoring, file)
