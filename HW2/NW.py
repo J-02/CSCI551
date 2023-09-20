@@ -39,11 +39,20 @@ def main(scores, file):
         V[i][0] = i * gap_penalty
     for j in range(1, n + 1):
         V[0][j] = j * gap_penalty
-
+###
     # Filling in the scoring matrix V
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
+    for i in range(1, m):
+        for j in range(1, n):
             match_score = V[i - 1][j - 1] + (match if T[i] == S[j] else mismatch)
+            gap_in_T = V[i - 1][j] + insertion
+            gap_in_S = V[i][j - 1] + deletion
+            V[i][j] = max(match_score, gap_in_T, gap_in_S)
+
+###
+    # Filling in the scoring matrix V
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            match_score = V[i - 1][j - 1] + (match if T[i - 1] == S[j - 1] else mismatch)
             gap_in_T = V[i - 1][j] + insertion
             gap_in_S = V[i][j - 1] + deletion
             V[i][j] = max(match_score, gap_in_T, gap_in_S)
@@ -65,4 +74,4 @@ main((2, -1, -1, -1), "test.fa")
 #     d = int(sys.argv[4])
 #     file = sys.argv[5]
 #     scoring = (a, b, c, d)
-#     main(scoring, file)
+#  main(scoring, file)

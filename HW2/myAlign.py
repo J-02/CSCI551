@@ -13,8 +13,12 @@ def main(scores, file):
     # score for match
     mismatch = scores[1]
     # score for mismatch
-    insdel = scores[2]
+   insertion = scores[2]
+   deletion = scores[3]
     # score for insertion/deletion
+
+    gap_penalty = -1
+
 
     # adding gaps to the beginning of each sequence
     T = "-" + motifs[1]
@@ -23,25 +27,36 @@ def main(scores, file):
     # debug print
     print(T)
     print(S)
-
+    m = len(T)
+    n = len(S)
     # initialize V
-    V = np.zeros(shape = (len(T), len(S)))
+    V = np.zeros(shape = (m +1, n +1))
 
     # debug print
     print(V)
-
+    for i, V in enumerate(T):
+        V[i,0] = i * gap_penalty
+    for j, V in enumerate(S):
+        V[0,j] = j * gap_penalty
     # iterating through each letter in T
     for i, Ti in enumerate(T):
+        print(i,Ti)
         # i is index of Ti in T
         # iterating through each letter in S
         for j, Sj in enumerate(S):
+            print(j,Sj)
             # j is index of Sj in S
             if Ti == Sj:
+
                 # if equal add match score
                 V[i,j] += match
             elif i != j:
+                V[i,j]- mismatch
                 # TODO: add rest of algorithm here
                 pass
+
+
+
 
 
 
