@@ -5,12 +5,16 @@ import numpy as np
 # can be run on any text file in directory with 2 sequences
 # This code reads the text file to list of 2 elements
 
-def main(scores, file):
+def main(file):
 
-    motif = readFasta(file)
+    motif = readFasta(file)[0]
+    suffixArray(motif)
 
 def suffixArray(string):
-    return
+    suffixes = []
+    for idx, i in enumerate(string):
+        suffixes.append(string[idx:])
+    print(suffixes)
 
 
 def readFasta(file):
@@ -25,9 +29,9 @@ def readFasta(file):
             text = ""
 
         else:
-            motifs.append(seq)
+            motifs.append(seq+"$")
 
-    print(f"Getting Global alignment for {motifs}")
+    print(f"Getting Suffix Array for {motifs}")
     return motifs
 
 # test run function
@@ -36,9 +40,5 @@ def readFasta(file):
 
 # to run in terminal
 if __name__ == "__main__":
-   a = int(sys.argv[1])
-   b = int(sys.argv[2])
-   c = int(sys.argv[3])
-   file = sys.argv[4]
-   scoring = (a,b,c)
-   main(scoring, file)
+   file = "test.fa"
+   main(file)
