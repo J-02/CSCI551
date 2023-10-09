@@ -25,7 +25,7 @@ def main(scores, file):
     # Extract scoring parameters
     match = scores[0]
     mismatch = scores[1]
-    insertion = scores[2]
+    insertion: object = scores[2]
     deletion = scores[3]
     gap_penalty = -1  # Gap penalty (you can customize this)
 
