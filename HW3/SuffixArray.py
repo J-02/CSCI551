@@ -96,6 +96,9 @@ def readFasta(file):
 # to run in terminal
 if __name__ == "__main__":
     file = sys.argv[1]
-    Q = sys.argv[2]
+    try:
+        Q = sys.argv[2]
+    except Exception as e:
+        Q = None
     main(file, Q)
 
