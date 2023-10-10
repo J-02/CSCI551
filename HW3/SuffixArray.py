@@ -6,16 +6,17 @@ import numpy as np
 # This code reads the text file to list of 2 elements
 
 def main(file):
-
     motif = readFasta(file)[0]
-    suffixArray(motif)
+    SA = suffixArray(motif)
+    for idx, i in enumerate(SA):
+        print(f'SA[{idx}] = {i}')
 
 def suffixArray(string):
     suffixes = []
     for idx, i in enumerate(string):
         suffixes.append(string[idx:])
-    print(suffixes)
-
+    SA = sorted(suffixes)
+    return SA
 
 def readFasta(file):
     motifs = []
