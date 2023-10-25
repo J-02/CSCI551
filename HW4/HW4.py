@@ -79,9 +79,6 @@ def range_search(file, Q):
             return None, None
 
     print(f'range[{seq}, {Q}] = [{top}, {bottom}]')
-    SA = suffixArray(seq)
-    print(SA)
-    print(SA[top:bottom+1])
 
     return top, bottom + 1
 
@@ -92,6 +89,67 @@ def suffixArray(string):
     SA = sorted(suffixes)
     return SA
 
-file = "WedTest.fa"
+def sampledSuffixArray(s, k=10):
+    SA = suffixArray(s)
+    sampledSA = {i: pos for i, pos in enumerate(SA) if i % k == 0}
+    return sampledSA, k
+
+
+def findEntry(seq, bwt_seq, C, OCC, sampled_suffix_array, k, target_index):
+    if target_index in sampled_suffix_array:
+        return sampled_suffix_array[target_index]
+
+    # Find the closest sampled index below the target index
+    sampled_index = (target_index // k) * k
+
+    # Initialize the current index and character to the sampled index and corresponding character
+    current_index = sampled_index
+    current_char = seq[sampled_index]
+
+    # Follow the FM-index backward until reaching the target index
+    while current_index != target_index:
+        # Compute the previous index using the FM-index
+        previous_index = C[current_char] + OCC[current_char, current_index - 1]
+
+        # Update the current index and character
+        current_index = previous_index
+        current_char = bwt_seq[current_index]
+
+    # Return the position in seq corresponding to the target index
+    return sampled_suffix_array[sampled_index] + (target_index - sampled_index)
+
+
+
+print("Part 1:\n S = ACTGGGAAATCGAAGACCCGG")
+file = "test.fa"
 fmindex(file)
+
+print("\nPart 2:\n")
+
+test1 = getSeq(file)
+print(f"Suffix array for: {test1}")
+print(suffixArray(test1))
 range_search(file, Q="AT")
+range_search(file, Q="AA")
+file = "WedTest.fa"
+test2 = getSeq(file)
+print(f"\nSuffix array for: {test2}")
+print(suffixArray(test1))
+range_search(file, Q="AT")
+range_search(file, Q="AA")
+file = "test2.fa"
+test3 = getSeq(file)
+print(f"\nSuffix array for: {test3}")
+print(suffixArray(test1))
+range_search(file, Q="AT")
+range_search(file, Q="AA")
+
+print("\nPart 3:\n")
+file = "test3.fa"
+test3 = getSeq(file)
+
+sSA, k = sampledSuffixArray(test3)
+C, OCC, bwtSeq, seq = fmindex(file)
+entry = findEntry(seq, bwtSeq, C, OCC, sSA, k, 5)
+print(entry)
+
