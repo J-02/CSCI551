@@ -65,22 +65,33 @@ def fmindex(file, Print=True):
 
 
 def range_search(file, Q):
-    C, OCC, bwtSeq, seq =fmindex(file, Print=False)
+    # getting
+    C, OCC, bwtSeq, seq = fmindex(file, Print=False)
     top = 0
     bottom = len(bwtSeq) - 1
 
     for char in reversed(Q):
         if char in C:
-            top = C[char] + (OCC[char, top - 1] if top > 0 else 0)
+            top = C[char] + (OCC[char, top-1] if top > 0 else 0)
             bottom = C[char] + OCC[char, bottom] - 1
         else:
             # Character not in text, return empty range
             return None, None
 
-    print(f'range[{seq}, {Q}] = [{top}, {bottom+1}]')
+    print(f'range[{seq}, {Q}] = [{top}, {bottom}]')
+    SA = suffixArray(seq)
+    print(SA)
+    print(SA[top:bottom+1])
 
     return top, bottom + 1
 
-file = "test.fa"
+def suffixArray(string):
+    suffixes = []
+    for idx, i in enumerate(string):
+        suffixes.append(string[idx:])
+    SA = sorted(suffixes)
+    return SA
+
+file = "WedTest.fa"
 fmindex(file)
 range_search(file, Q="AT")
