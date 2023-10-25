@@ -81,5 +81,6 @@ def range_search(file, Q):
 
     return top, bottom + 1
 
-fmindex("test.fa")
-range_search("test.fa", Q="AT")
+file = "test.fa"
+fmindex(file)
+range_search(file, Q="AT")
