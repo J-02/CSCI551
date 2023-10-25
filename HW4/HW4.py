@@ -149,7 +149,7 @@ file = "test3.fa"
 test3 = getSeq(file)
 
 sSA, k = sampledSuffixArray(test3)
-C, OCC, bwtSeq, seq = fmindex(file)
+C, OCC, bwtSeq, seq = fmindex(file, Print=False)
 entry = findEntry(seq, bwtSeq, C, OCC, sSA, k, 5)
 print(entry)
 
