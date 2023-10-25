@@ -7,13 +7,23 @@ def getSeq(file):
     return seq
 
 def bwt(s):
+    # make sure s is a string
     s = str(s)
-    table = sorted(s[i:] + s[:i] for i in range(len(s)))
-    last_column = [row[-1] for row in table]
+
+    # create a list/table of all cyclic rotations of 's' then sort them lexographically
+    bw = sorted(s[i:] + s[:i] for i in range(len(s)))
+
+    # take the last column to get the BWT
+    last_column = [row[-1] for row in bw]
+
+    # return the string
     return "".join(last_column)
 
 def fmindex(file):
+    # reading the file into string format
     seq = getSeq(file)
+
+    # getting the bwt of the seq
     bwt_seq = bwt(seq)
 
     # Compute the C table
@@ -40,5 +50,3 @@ def fmindex(file):
         print(f'OCC[{char},{i}] = {count}')
 
 fmindex("test.fa")
-
-
