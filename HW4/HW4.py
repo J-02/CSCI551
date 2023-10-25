@@ -24,29 +24,64 @@ def fmindex(file):
     seq = getSeq(file)
 
     # getting the bwt of the seq
-    bwt_seq = bwt(seq)
+    bwtSeq = bwt(seq)
 
-    # Compute the C table
+    # Compute the C table as a dictionary
     C = {}
-    char_counts = Counter(bwt_seq)
-    char_sum = 0
-    for char in sorted(char_counts.keys()):
-        C[char] = char_sum
-        char_sum += char_counts[char]
+    # get occurrences of each unique letter in sequence
+    charC = Counter(bwtSeq)
+    # initializing charSum
+    charSum = 0
+    # sort char counts lexicographically then
+    for char in sorted(charC.keys()):
+        C[char] = charSum
+        charSum += charC[char]
+        # gets the amount of characters lexicographically smaller than char
 
     # Compute the occurrence table (OCC)
     OCC = {}
-    char_counts = {char: 0 for char in set(bwt_seq)}
-    for i, char in enumerate(bwt_seq):
+    # initializing empty char counts
+    char_counts = {char: 0 for char in set(bwtSeq)}
+
+    # loop through all the chars and indexes in the BWT Seq
+    for i, char in enumerate(bwtSeq):
+        # count the occurrence
         char_counts[char] += 1
+
+        # loop through table and update where the occurrences occur
         for char, count in char_counts.items():
+            # update count
             OCC[char, i] = count
 
     # Output the FM-index
-    print(f'BW = {bwt_seq}')
+    print(f'BW = {bwtSeq}')
     for char, count in C.items():
         print(f'C[{char}] = {count}')
     for (char, i), count in OCC.items():
         print(f'OCC[{char},{i}] = {count}')
 
-fmindex("test.fa")
+    return C, OCC, bwtSeq, seq
+
+
+def range_search(C, OCC, bwt_seq, Q, S):
+    top = 0
+    bottom = len(bwt_seq) - 1
+
+    for char in reversed(Q):
+        if char in C:
+            top = C[char] + (OCC[char, top - 1] if top > 0 else 0)
+            bottom = C[char] + OCC[char, bottom] - 1
+        else:
+            # Character not in text, return empty range
+            return None, None
+
+    print(f'range[{S}, {Q}] = [{bottom}, {top}]')
+
+    return top, bottom + 1
+
+def main(file, Q):
+    C, OCC, bwtSeq, S = fmindex(file)
+    range = range_search(C, OCC, bwtSeq, Q, S)
+
+
+main("test.fa", Q="AT")
