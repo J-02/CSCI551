@@ -19,7 +19,7 @@ def bwt(s):
     # return the string
     return "".join(last_column)
 
-def fmindex(file):
+def fmindex(file, Print=True):
     # reading the file into string format
     seq = getSeq(file)
 
@@ -52,7 +52,8 @@ def fmindex(file):
         for char, count in char_counts.items():
             # update count
             OCC[char, i] = count
-
+    if not Print:
+        return C, OCC, bwtSeq, seq
     # Output the FM-index
     print(f'BW = {bwtSeq}')
     for char, count in C.items():
@@ -63,9 +64,10 @@ def fmindex(file):
     return C, OCC, bwtSeq, seq
 
 
-def range_search(C, OCC, bwt_seq, Q, S):
+def range_search(file, Q):
+    C, OCC, bwtSeq, seq =fmindex(file, Print=False)
     top = 0
-    bottom = len(bwt_seq) - 1
+    bottom = len(bwtSeq) - 1
 
     for char in reversed(Q):
         if char in C:
@@ -75,13 +77,9 @@ def range_search(C, OCC, bwt_seq, Q, S):
             # Character not in text, return empty range
             return None, None
 
-    print(f'range[{S}, {Q}] = [{bottom}, {top}]')
+    print(f'range[{seq}, {Q}] = [{top}, {bottom+1}]')
 
     return top, bottom + 1
 
-def main(file, Q):
-    C, OCC, bwtSeq, S = fmindex(file)
-    range = range_search(C, OCC, bwtSeq, Q, S)
-
-
-main("test.fa", Q="AT")
+fmindex("test.fa")
+range_search("test.fa", Q="AT")
