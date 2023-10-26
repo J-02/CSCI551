@@ -1,155 +1,151 @@
 from Bio import SeqIO
 from Bio.Seq import Seq
 from collections import Counter
+
 def getSeq(file):
     record = SeqIO.read(file, "fasta")
     seq = Seq(str(record.seq)+ "$")
     return seq
 
 def bwt(s):
-    # make sure s is a string
-    s = str(s)
-
     # create a list/table of all cyclic rotations of 's' then sort them lexographically
     bw = sorted(s[i:] + s[:i] for i in range(len(s)))
-
     # take the last column to get the BWT
     last_column = [row[-1] for row in bw]
-
-    # return the string
+    # return the string concatenated string
     return "".join(last_column)
 
-def fmindex(file, Print=True):
-    # reading the file into string format
-    seq = getSeq(file)
-
-    # getting the bwt of the seq
-    bwtSeq = bwt(seq)
-
-    # Compute the C table as a dictionary
-    C = {}
-    # get occurrences of each unique letter in sequence
-    charC = Counter(bwtSeq)
-    # initializing charSum
-    charSum = 0
-    # sort char counts lexicographically then
-    for char in sorted(charC.keys()):
-        C[char] = charSum
-        charSum += charC[char]
-        # gets the amount of characters lexicographically smaller than char
-
-    # Compute the occurrence table (OCC)
-    OCC = {}
-    # initializing empty char counts
-    char_counts = {char: 0 for char in set(bwtSeq)}
-
-    # loop through all the chars and indexes in the BWT Seq
-    for i, char in enumerate(bwtSeq):
-        # count the occurrence
-        char_counts[char] += 1
-
-        # loop through table and update where the occurrences occur
-        for char, count in char_counts.items():
-            # update count
-            OCC[char, i] = count
-    if not Print:
-        return C, OCC, bwtSeq, seq
-    # Output the FM-index
-    print(f'BW = {bwtSeq}')
-    for char, count in C.items():
-        print(f'C[{char}] = {count}')
-    for (char, i), count in OCC.items():
-        print(f'OCC[{char},{i}] = {count}')
-
-    return C, OCC, bwtSeq, seq
+def suffixArray(s):
+    # takes each suffix and place and puts suffix index in lex sorted list
+    return [i for _, i in sorted((s[i:], i) for i in range(len(s)))]
 
 
-def range_search(file, Q):
-    # getting
-    C, OCC, bwtSeq, seq = fmindex(file, Print=False)
-    top = 0
-    bottom = len(bwtSeq) - 1
+class Sequence:
+    def __init__(self, file, k=10):
+        # initializes
+        # k: for the sampled suffix array
+        # seq: to string with '$' at the end
+        # bwtSeq: the BWT sequence
+        # C, OCC: C and OCC arrays from fmindex
+        # SA: suffix array to check correctness of sampled SA and to construct SSA from
+        # SSA: sampled suffix array with 'k' sampling rate
+        # suffixes: list of suffixes to find by index
+        self.k = k
+        self.seq = getSeq(file)
+        self.bwtSeq = bwt(self.seq)
+        self.C, self.OCC = self.fmindex()
+        self.SA = suffixArray(self.seq)
+        self.SSA = self.sampledSuffixArray(k=self.k)
+        self.suffixes = self.getSuffixes()
+        self.len = len(self.bwtSeq)
 
-    for char in reversed(Q):
-        if char in C:
-            top = C[char] + (OCC[char, top-1] if top > 0 else 0)
-            bottom = C[char] + OCC[char, bottom] - 1
-        else:
-            # Character not in text, return empty range
-            return None, None
+    def getSuffixes(self):
+        # gets dictionary of index and suffix not sorted
+        suffixes = {(idx, self.seq[idx:]) for idx, i in enumerate(self.seq)}
+        return suffixes
 
-    print(f'range[{seq}, {Q}] = [{top}, {bottom}]')
+    def printFmindex(self):
+        # prints FM index information
+        print(f"Sequence: {self.seq}")
+        print(f'BW = {self.bwtSeq}')
+        for char, count in self.C.items():
+            print(f'C[{char}] = {count}')
+        for (char, i), count in self.OCC.items():
+            print(f'OCC[{char},{i}] = {count}')
+        return
 
-    return top, bottom + 1
+    def fmindex(self):
+        # gets the C and OCC arrays
+        C = {}
+        # get occurrences of each unique letter in sequence
+        charC = Counter(self.bwtSeq)
+        # initializing charSum
+        charSum = 0
+        # sort char counts lexicographically then
+        for char in sorted(charC.keys()):
+            C[char] = charSum
+            charSum += charC[char]
+            # gets the amount of characters lexicographically smaller than char
 
-def suffixArray(string):
-    suffixes = []
-    for idx, i in enumerate(string):
-        suffixes.append(string[idx:])
-    SA = sorted(suffixes)
-    return SA
+        # Compute the occurrence table (OCC)
+        OCC = {}
+        # initializing empty char counts
+        char_counts = {char: 0 for char in set(self.bwtSeq)}
 
-def sampledSuffixArray(s, k=10):
-    SA = suffixArray(s)
-    sampledSA = {i: pos for i, pos in enumerate(SA) if i % k == 0}
-    return sampledSA, k
+        # loop through all the chars and indexes in the BWT Seq
+        for i, char in enumerate(self.bwtSeq):
+            # count the occurrence
+            char_counts[char] += 1
+
+            # loop through table and update where the occurrences occur
+            for char, count in char_counts.items():
+                # update count
+                OCC[char, i] = count
+        return C, OCC
+
+    def printRangeSearch(self, Q):
+        # prints the range search information
+        top, bottom = self.rangeSearch(Q)
+        print(f'range[{self.seq}, {Q}] = [{top}, {bottom-1}]')
+
+    def rangeSearch(self, Q):
+        # performs range search for string Q
+        top = 0
+        bottom = len(self.bwtSeq) - 1
+
+        for char in reversed(Q):
+            if char in self.C:
+                top = self.C[char] + (self.OCC[char, top - 1] if top > 0 else 0)
+                bottom = self.C[char] + self.OCC[char, bottom] - 1
+            else:
+                # Character not in text, return empty range
+                return None, None
+
+        return top, bottom + 1
+
+    def sampledSuffixArray(self, k=10):
+        # creates samples suffix array from SA with k rate
+        sampledSA = {i: pos for i, pos in enumerate(self.SA) if i % k == 0}
+        return sampledSA
+
+    def printFindEntry(self,i):
+        # prints the info for finding entry
+        print(f"SA[{i}] = {self.findEntry(i)} ")
+
+    def findEntry(self, i):
+        i_prime = i
+        delta = 0
+        while i_prime not in self.SSA:
+            x = self.bwtSeq[i_prime]
+            i_prime = self.C[x] + self.OCC[(x, i_prime)] - 1
+            delta += 1
+        return (self.SSA[i_prime] + delta) % self.len
 
 
-def findEntry(seq, bwt_seq, C, OCC, sampled_suffix_array, k, target_index):
-    if target_index in sampled_suffix_array:
-        return sampled_suffix_array[target_index]
-
-    # Find the closest sampled index below the target index
-    sampled_index = (target_index // k) * k
-
-    # Initialize the current index and character to the sampled index and corresponding character
-    current_index = sampled_index
-    current_char = seq[sampled_index]
-
-    # Follow the FM-index backward until reaching the target index
-    while current_index != target_index:
-        # Compute the previous index using the FM-index
-        previous_index = C[current_char] + OCC[current_char, current_index - 1]
-
-        # Update the current index and character
-        current_index = previous_index
-        current_char = bwt_seq[current_index]
-
-    # Return the position in seq corresponding to the target index
-    return sampled_suffix_array[sampled_index] + (target_index - sampled_index)
+seq1 = Sequence('test.fa')
+seq2 = Sequence('test2.fa')
+seq3 = Sequence('WedTest.fa')
+seq4 = Sequence('test3.fa', 250)
 
 
+print("Part 1:\nFM-Index:")
+seq1.printFmindex()
+print()
 
-print("Part 1:\n S = ACTGGGAAATCGAAGACCCGG")
-file = "test.fa"
-fmindex(file)
+query = 'AT'
+print(f"Part 2:\n Range search:")
+seq1.printRangeSearch('AT')
+seq1.printRangeSearch('AA')
+seq2.printRangeSearch('AT')
+seq2.printRangeSearch('AA')
+seq3.printRangeSearch('AT')
+seq3.printRangeSearch('AA')
+print()
 
-print("\nPart 2:\n")
-
-test1 = getSeq(file)
-print(f"Suffix array for: {test1}")
-print(suffixArray(test1))
-range_search(file, Q="AT")
-range_search(file, Q="AA")
-file = "WedTest.fa"
-test2 = getSeq(file)
-print(f"\nSuffix array for: {test2}")
-print(suffixArray(test1))
-range_search(file, Q="AT")
-range_search(file, Q="AA")
-file = "test2.fa"
-test3 = getSeq(file)
-print(f"\nSuffix array for: {test3}")
-print(suffixArray(test1))
-range_search(file, Q="AT")
-range_search(file, Q="AA")
-
-print("\nPart 3:\n")
-file = "test3.fa"
-test3 = getSeq(file)
-
-sSA, k = sampledSuffixArray(test3)
-C, OCC, bwtSeq, seq = fmindex(file, Print=False)
-entry = findEntry(seq, bwtSeq, C, OCC, sSA, k, 5)
-print(entry)
-
+# Answer to Bonus question: Suffix Array Sampling
+print("Part 3:\n Finding SA[i] using sampled suffix array where k = 250 for 'test3.fa':")
+print(f"Length of test4.fa: {seq4.len}")
+print(f"Samples Suffix Array:\n {seq4.SSA}")
+i = 34
+print(f"Finding entry {i}:\n SA[{i}] = {seq4.findEntry(i)}")
+print(f"From actual SA: {seq4.SA[i]}")
