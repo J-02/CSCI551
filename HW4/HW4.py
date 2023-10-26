@@ -147,5 +147,6 @@ print("Part 3:\n Finding SA[i] using sampled suffix array where k = 250 for 'tes
 print(f"Length of test4.fa: {seq4.len}")
 print(f"Samples Suffix Array:\n {seq4.SSA}")
 i = 34
-print(f"Finding entry {i}:\n SA[{i}] = {seq4.findEntry(i)}")
-print(f"From actual SA: {seq4.SA[i]}")
+print(f"Finding entry {i}:")
+seq4.printFindEntry(i)
+print(f"From actual SA[{i}]: {seq4.SA[i]}")
