@@ -3,6 +3,7 @@ from Bio.Seq import Seq
 from collections import Counter
 
 def getSeq(file):
+    # gets sequence from fasta file
     record = SeqIO.read(file, "fasta")
     seq = Seq(str(record.seq)+ "$")
     return seq
@@ -21,6 +22,7 @@ def suffixArray(s):
 
 
 class Sequence:
+    # creates a sequence object from the fasta file
     def __init__(self, file, k=10):
         # initializes
         # k: for the sampled suffix array
@@ -113,12 +115,20 @@ class Sequence:
         print(f"SA[{i}] = {self.findEntry(i)} ")
 
     def findEntry(self, i):
+        # i' is i initially
         i_prime = i
+        # set delta to 0
         delta = 0
+        # while the current i' is not a key in the SSA dict
         while i_prime not in self.SSA:
+            # initialize character x from the bwtSeq of i'
             x = self.bwtSeq[i_prime]
+            # get new i' from C[x] + OOC[x,i'] - 1
             i_prime = self.C[x] + self.OCC[(x, i_prime)] - 1
+            # increment the delta
             delta += 1
+        # add the delta back to SSA[i'] then modulo by the length of the sequence
+        # to make up for when delta + the index is larger than the length of the seq
         return (self.SSA[i_prime] + delta) % self.len
 
 
