@@ -138,12 +138,12 @@ seq3 = Sequence('WedTest.fa')
 seq4 = Sequence('test3.fa', 250)
 
 
-print("Part 1:\nFM-Index:")
+print("Part 1 FM-Index:")
 seq1.printFmindex()
 print()
 
 query = 'AT'
-print(f"Part 2:\n Range search:")
+print(f"Part 2 Range search:")
 seq1.printRangeSearch('AT')
 seq1.printRangeSearch('AA')
 seq2.printRangeSearch('AT')
@@ -152,7 +152,7 @@ seq3.printRangeSearch('AT')
 seq3.printRangeSearch('AA')
 print()
 
-print("Part 3:\n Finding SA[i] using sampled suffix array where k = 250 for 'test3.fa':")
+print("Part 3 Finding SA[i] using sampled suffix array where k = 250 for 'test3.fa':")
 print(f"Length of test4.fa: {seq4.len}")
 print(f"Samples Suffix Array:\n {seq4.SSA}")
 i = 34
