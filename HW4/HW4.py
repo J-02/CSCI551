@@ -152,7 +152,6 @@ seq3.printRangeSearch('AT')
 seq3.printRangeSearch('AA')
 print()
 
-# Answer to Bonus question: Suffix Array Sampling
 print("Part 3:\n Finding SA[i] using sampled suffix array where k = 250 for 'test3.fa':")
 print(f"Length of test4.fa: {seq4.len}")
 print(f"Samples Suffix Array:\n {seq4.SSA}")
