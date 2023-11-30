@@ -131,11 +131,14 @@ class Sequence:
         # to make up for when delta + the index is larger than the length of the seq
         return (self.SSA[i_prime] + delta) % self.len
 
-
+study = Sequence('study.fa')
 seq1 = Sequence('test.fa')
 seq2 = Sequence('test2.fa')
 seq3 = Sequence('WedTest.fa')
 seq4 = Sequence('test3.fa', 250)
+
+print(study.suffixes)
+print(study.SA)
 
 
 print("Part 1 FM-Index:")
