@@ -44,16 +44,18 @@ def center_star(seqs, alpha, beta, output_center_sequence=False):
     center, total_distances = center_sequence(distances)
 
     if output_center_sequence:
+        print("Sequences:")
         for i in seqs.keys():
             print(f"{i}: {seqs[i]}")
 
-        print(f"Scoring: Alpha = {alpha}, Beta = {beta}")
+        print(f"\nScoring: Alpha = {alpha}, Beta = {beta}")
         print("Center Sequence:", center, seqs[center])
         print("Total Distances:", total_distances)
     else:
         return center
 
 def align_to_center(center, sequence):
+    global aligner
     # Aligns given seq to the center
     alignments = aligner.align(center, sequence)
     best_alignment = alignments[0]
@@ -90,27 +92,29 @@ def MSA(center_seq, seqs):
 
     return center, aligned_seqs
 
+def main(alpha, beta, fasta):
+    global aligner
+    sequences = read_fasta(fasta)
+    center_star(sequences, alpha, beta, True)
+    center = center_star(sequences, alpha, beta, False)
+    # Initialize the aligner
+    aligner = Align.PairwiseAligner()
+    aligner.mode = 'global'  # For global alignment
+    aligner.match_score = alpha  # Positive value for matches
+    aligner.mismatch_score = -alpha  # Negative value for mismatches
+    aligner.open_gap_score = -beta  # Negative value for opening a gap
+    aligner.extend_gap_score = -beta
+    center_seq = sequences.pop(center)
+    center_seq, aligned_seqs = MSA(center_seq, sequences)
 
+    print("\nMutiple String Alignment")
+    print(f"{center}: {center_seq}")
+    for i in aligned_seqs.keys():
+        print(f"{i}: {aligned_seqs[i]}")
+    print("\n")
 
-alpha = 1
-beta = 1
-fasta = "test.fasta"  # Replace with your file path
-sequences = read_fasta(fasta)
-center_star(sequences, alpha, beta, True)
-center = center_star(sequences, alpha, beta, False)
-# Initialize the aligner
-aligner = Align.PairwiseAligner()
-aligner.mode = 'global'  # For global alignment
-aligner.match_score = alpha   # Positive value for matches
-aligner.mismatch_score = -alpha  # Negative value for mismatches
-aligner.open_gap_score = -beta  # Negative value for opening a gap
-aligner.extend_gap_score = -beta
-center_seq = sequences.pop(center)
-center_seq, aligned_seqs= MSA(center_seq, sequences)
-
-print("\nMutiple String Alignment")
-print(f"{center}: {center_seq}")
-for i in aligned_seqs.keys():
-    print(f"{i}: {aligned_seqs[i]}")
+main(1,1,"test.fasta")
+main(1,1,"test2.fasta")
+main(1,1,"test3.fasta")
 
 
