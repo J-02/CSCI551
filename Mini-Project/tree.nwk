@@ -1,0 +1,15 @@
+(NC_016949.1_9280-10866-Aplysina-cauliformis-mitochondrion_comple:1.761,
+((NC_027236.1_5518-7071-Rana-sylvatica-mitochondrion_complete_geno:0.4671,
+(NC_053523.1_5419-6969-Gallus-gallus-isolate-GalGal1-mitochondrio:0.2372,
+NC_008143.1_5329-6885-Crocodylus-porosus-mitochondrion_complete:0.4366)
+0.71:0.08204)0.42:0.05184,
+((((NC_020729.1_5327-6871-Odocoileus-hemionus-isolate-T1766-mitochon:0.0035,
+NC_015247.1_380-1924-Odocoileus-virginianus-mitochondrion_comple:0.00139)
+1:0.1448,NC_006853.1_5687-7231-Bos-taurus-mitochondrion_complete_genome:0.0967)
+1:0.1287,
+(NC_003427.1_6484-8028-Ursus-arctos-mitochondrion_complete_genome:0.06834,
+NC_003426.1_6291-7835-Ursus-americanus-mitochondrion_complete_ge:0.04339)
+1:0.2024)0.92:0.07557,
+(NC_012920.1_5904-7445-Homo-sapiens-mitochondrion_complete_genome:0.00354,
+NC_011137.1_5899-7440-Homo-sapiens-neanderthalensis-mitochondrio:0.00723)
+1:0.2761)0.74:0.07218):1.19);
