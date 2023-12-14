@@ -6,6 +6,9 @@ import time
 from io import StringIO
 import math
 from ngesh.random_tree import gen_tree
+from tralda.datastructures import Tree
+from tralda.datastructures import LCA
+
 
 
 def timer(func):
@@ -92,133 +95,73 @@ def naiveLCA(tree, queries):
             else:
                 break
         return lca
-    lcas = [find_lca(tree.root, node1_name, node2_name) for (node1_name, node2_name) in queries]
-    return lcas
 
+    lcas = [find_lca(tree.root, node1_name, node2_name) for (node1_name, node2_name) in queries]
+    return {(q[0], q[1]): lca.name for q, lca in zip(queries, lcas) if lca is not None}
+
+class UnionFind:
+    """A simple Union-Find class for Tarjan's LCA algorithm."""
+    def __init__(self):
+        self.parent = {}
+        self.rank = {}
+
+    def make_set(self, x):
+        self.parent[x] = x
+        self.rank[x] = 0
+
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        root_x = self.find(x)
+        root_y = self.find(y)
+
+        if root_x != root_y:
+            if self.rank[root_x] > self.rank[root_y]:
+                self.parent[root_y] = root_x
+            elif self.rank[root_x] < self.rank[root_y]:
+                self.parent[root_x] = root_y
+            else:
+                self.parent[root_y] = root_x
+                self.rank[root_x] += 1
 
 def tarjansLCA(tree, queries):
-    """Uses adjacency lists, Union Find, and depth first search to find and save all lca's """
-    # Build adjacency list
-    queries = [tuple(query) if isinstance(query, list) else query for query in queries]
-
-    def build_adjacency_list(tree):
-        # creating adjaceny list
-        adj_list = {}
-
-        def build_list(clade, parent=None):
-            # builds list by going from clade to clade and retains parents
-            if clade.name not in adj_list:
-                adj_list[clade.name] = []
-            if parent:
-                adj_list[parent.name].append(clade.name)
-            for child in clade.clades:
-                # recurisive call for children
-                build_list(child, clade)
-
-        build_list(tree.root)
-        return adj_list
-
-    adj_list = build_adjacency_list(tree)
-
-    # Union-Find structure
-    class UnionFind:
-        def __init__(self):
-            self.parent = {}
-
-        def make_set(self, x):
-            self.parent[x] = x
-
-        def find(self, x):
-            if self.parent[x] != x:
-                self.parent[x] = self.find(self.parent[x])  # Path compression
-            return self.parent[x]
-
-        def union(self, x, y):
-            self.parent[self.find(x)] = self.find(y)
-
-    uf = UnionFind()
-    ancestors = {}
-    lca = {}
-
-    # Iterative DFS
-    def dfs_iterative(root, adj_list, uf, ancestors, queries):
-        stack = [(root, None)]  # Stack for iterative DFS: (node, parent)
-        visited = set()
-
-        while stack:
-            node, parent = stack.pop()
-            if node not in visited:
-                visited.add(node)
-                uf.make_set(node)
-                ancestors[node] = node
-
-                for child in adj_list.get(node, []):
-                    stack.append((child, node))
-
-            if parent is not None:
-                uf.union(node, parent)
-                ancestors[uf.find(node)] = node
-
-        # process the queries with dynamicish program
-        for u, v in queries:
-            if u in ancestors and v in ancestors:
-                lca[(u, v)] = ancestors[uf.find(u)] if uf.find(u) == uf.find(v) else None
-
-    dfs_iterative(tree.root.name, adj_list, uf, ancestors, queries)
-
-    # Return the results of the queries
-    return {query: lca[query] for query in queries if query in lca}
-def farach_colton_bender_lca(tree, queries):
-    # Euler Tour to record the visitation order and levels of nodes
-    def euler_tour(node, depth=0):
-        if node is None:
-            return [], [], {}
-        tour, levels, first_occurrences = [node], [depth], {}
-        first_occurrences[node.name] = len(tour) - 1
-        for child in node.clades:
-            t, l, f = euler_tour(child, depth + 1)
-            tour.extend(t + [node])
-            levels.extend(l + [depth])
-            first_occurrences.update(f)
-        return tour, levels, first_occurrences
-
-    euler, levels, first_occurrences = euler_tour(tree.root)
-
-    # Build RMQ Structure using Sparse Table
-    def build_sparse_table(levels):
-        N = len(levels)
-        K = math.floor(math.log2(N)) + 1
-        st = [[0] * K for _ in range(N)]
-        for i in range(N):
-            st[i][0] = i
-        for j in range(1, K):
-            for i in range(N - (1 << j) + 1):
-                if levels[st[i][j-1]] < levels[st[i + (1 << (j-1))][j-1]]:
-                    st[i][j] = st[i][j-1]
-                else:
-                    st[i][j] = st[i + (1 << (j-1))][j-1]
-        return st
-
-    st = build_sparse_table(levels)
-
-    # LCA Query using RMQ
-    def query_lca(u, v):
-        l, r = first_occurrences[u], first_occurrences[v]
-        if l > r:
-            l, r = r, l
-        j = int(math.log2(r - l + 1))
-        if levels[st[l][j]] < levels[st[r - (1 << j) + 1][j]]:
-            return euler[st[l][j]].name
-        else:
-            return euler[st[r - (1 << j) + 1][j]].name
-
-    # Process queries
+    ancestor = {}
+    union_find = UnionFind()
     lca_results = {}
-    for u, v in queries:
-        lca_results[(u, v)] = query_lca(u, v)
+    visited = set()
 
+    def dfs(node):
+        # Adjust node identification method here
+        node_id = node.name  # or another unique identifier
+
+        union_find.make_set(node_id)
+        ancestor[union_find.find(node_id)] = node_id
+
+        # Adjust child node traversal based on Phylo tree structure
+        for child in node.clades:
+            dfs(child)
+            union_find.union(node_id, child.name)
+            ancestor[union_find.find(node_id)] = node_id
+
+        visited.add(node_id)
+
+        for (node1_name, node2_name) in queries:
+            if node_id in (node1_name, node2_name):
+                other = node1_name if node_id == node2_name else node2_name
+                if other in visited:
+                    lca_results[(node1_name, node2_name)] = ancestor[union_find.find(other)]
+
+    # Start DFS from the root of the Phylo tree
+    dfs(tree.root)
     return lca_results
 
+def farachLCA(tree, queries):
+    lca = LCA(tree)
+    lcas = {(n1, n2): lca.get(n1,n2).label for (n1, n2) in queries}
+    return lcas
 
 def experiment(name, tree, func, dr):
     tree, queries = tree
@@ -256,7 +199,7 @@ def main():
     # Collect data for varying number of nodes
     start = 10
     stop = 1000
-    step = 50
+    step = 250
     nodes = start
     while nodes <= stop:
         tree = create_random_tree(num_leaves=nodes, birth=1, death=0.5)
@@ -269,7 +212,7 @@ def main():
     tree = create_random_tree(num_leaves=1000, birth=1, death=0.5)
     start = 1
     stop = 1000
-    step = 50
+    step = 250
     num_queries = start
     while num_queries <= stop:
         queries = generateQueries(tree, num_queries)
@@ -277,7 +220,7 @@ def main():
         print(f"generated {num_queries} queries for tree")
         num_queries += step - start if num_queries == start else step
 
-    lcas = [tarjansLCA, farach_colton_bender_lca, naiveLCA]
+    lcas = [farachLCA, tarjansLCA, naiveLCA]
 
     # Run experiments and record results
     for lca in lcas:
@@ -286,11 +229,21 @@ def main():
 
         # Record results for varying nodes
         for node_count, tree in treenodes.items():
+            if lca == farachLCA:
+                handle = StringIO()
+                Phylo.write(tree, handle, "newick")
+                newick_string = handle.getvalue()
+                tree = Tree.parse_newick(newick_string)
             avg_time = experiment(f"{node_count}", tree, lca, .5)
             results[algo_name]["nodes"][node_count] = avg_time
 
         # Record results for varying queries
         for query_count, tree in treequeries.items():
+            if lca == farachLCA:
+                handle = StringIO()
+                Phylo.write(tree, handle, "newick")
+                newick_string = handle.getvalue()
+                tree = Tree.parse_newick(newick_string)
             avg_time = experiment("1000", tree, lca, .5)
             results[algo_name]["queries"][query_count] = avg_time
 
@@ -302,4 +255,27 @@ def main():
     plot_results(results, "queries")
 
     print(results)
+
+main()
+
+# testing all methods return the same answers
+tree = createPhylogenicTree("tree.nwk")
+q = generateQueries(tree, 10)
+assign_names_to_internal_nodes(tree)
+for clade in tree.find_clades():
+    clade.confidence = None
+handle = StringIO()
+Phylo.write(tree, handle, "newick")
+newick_string = handle.getvalue()
+tree1 = Tree.parse_newick(newick_string)
+
+lca_name = naiveLCA(tree, q[1])
+lca_name1 = farachLCA(tree1, q[1])
+lca_name2 = tarjansLCA(tree, q[1])
+
+for (i,ii) in q[1]:
+    print(f"LCA for {i, ii}: {lca_name[(i,ii)]} ")
+
+Phylo.draw(tree)
+Phylo.draw(tree1)
 
